@@ -381,5 +381,31 @@ merge 1:1 game_id using "${dir}/intermediate_data/games.dta"
 */
 drop if _merge != 3
 drop _merge
+drop dup
+drop game_id
+
+save ${dir}/cleaned_data/games_and_players.dta, replace
+
+ 
+/*----------------------------------------------------*/
+   /* [>   Adding time variables   <] */ 
+/*----------------------------------------------------*/
+split game_date_est, p("-")
+
+/* [> year <] */ 
+destring(game_date_~1), generate(year)
+drop game_date_~1
+
+/* [> month <] */ 
+destring(game_date_~2), generate(month)
+drop game_date_~2
+
+/* [> day <] */ 
+destring(game_date_~3), generate(day)
+drop game_date_~3
+
+drop game_date_est
+
+sort year month day
 
 save ${dir}/cleaned_data/games_and_players.dta, replace
