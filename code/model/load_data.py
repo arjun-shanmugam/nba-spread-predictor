@@ -1,4 +1,5 @@
 import pyreadstat
+import numpy as np
 
 
 def load_data_as_numpy():
@@ -9,3 +10,8 @@ def load_data_as_numpy():
     # print(df.head())
     df.to_csv("../../csv_data.csv") #so that I can view the data
     return df.to_numpy()
+
+def split_val_and_train(data):
+    np.random.shuffle(data)
+    train, validation = data[len(data)//5 * 4], data[len(data)//5*4]
+    return train, validation
