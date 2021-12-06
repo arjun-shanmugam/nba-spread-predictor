@@ -9,9 +9,11 @@ def load_data_as_numpy():
     df.dropna(axis=0, inplace=True) #remove any row w NaN
     # print(df.head())
     df.to_csv("../../csv_data.csv") #so that I can view the data
-    return df.to_numpy()
+    return df #tf takes pandas dataframes
 
-def split_val_and_train(data):
-    np.random.shuffle(data)
-    train, validation = data[len(data)//5 * 4], data[len(data)//5*4]
-    return train, validation
+def split_test_and_train(data):
+    """
+    splits dataframe into test and training datasets, where training is first 80% of the datasets
+    """
+    train, test = data[len(data)//5 * 4], data[len(data)//5*4]
+    return train, test

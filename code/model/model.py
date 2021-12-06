@@ -14,6 +14,29 @@ class Model(tf.keras.Model):
     def loss(self, probs, labels):
         return 0
 
+class FFModel(tf.keras.Model):
+    def __init__(self):
+        super(Model,self).__init__()
+        self.normalizer = tf.keras.layers.Normalization(axis=-1)
+        self.normalizer.adapt() #normalizing data batch by batch
+        self.model = tf.keras.layers.Sequential([
+            self.normalizer,
+            tf.keras.layers.Dense(20,activation='relu')
+            tf.keras.layers.Dense(20,activation='relu')
+            tf.keras.layers.Dense(1,activation='linear')
+        ])
+
+        self.model.compile(
+            optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+            loss = tf.keras.layers.MeanSquaredError()
+        )
+
+def train2(model,train_inputs,train_labels,batch_size,num_epochs):
+    """
+    new train model using model.fit
+    """
+    model.model.fit(train_inputs,train_labels,batch_size=batch_size,num_epochs=num_epochs)
+
 
 def train(model, train_inputs, train_labels):
     """
@@ -38,6 +61,11 @@ def train(model, train_inputs, train_labels):
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     return losses
 
+def test2(model,test_inputs,test_labels,batch_size):
+    """
+    same as other test using model.evaluate
+    """
+    return model.model.evaluate(test_inputs,test_labels,batch_size=batch_size)
 
 def test(model, test_inputs, test_labels):
     """
@@ -66,10 +94,14 @@ def test(model, test_inputs, test_labels):
 def main():
     #get data
     data = load_data_as_numpy()
-    train_data, validation_data = split_val_and_train(data)
+    train_data, test_data = split_test_and_train(data)
+    #have to
     #train for 50 epochs
-    for _ in range(50):
-        avg_loss = train(train_data)
+    num_epochs = 5
+    batch_size = 50
+    model = FFModel()
+    #have to find a way to split into data and labels
+
 
 if __name__ == '__main__':
     main()
