@@ -409,3 +409,32 @@ drop game_date_est
 sort year month day
 
 save ${dir}/cleaned_data/games_and_players.dta, replace
+
+/*----------------------------------------------------*/
+   /* [>   Accounting: missing values   <] */ 
+/*----------------------------------------------------*/
+egen nmcount = rownonmiss(_all)  // for each row, count number of nonmissing values
+tab nmcount
+/*
+    nmcount |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          6 |        137        0.57        0.57
+         25 |          2        0.01        0.58
+         44 |          3        0.01        0.59
+         63 |          6        0.03        0.62
+         82 |         11        0.05        0.67
+        101 |         26        0.11        0.78
+        120 |         84        0.35        1.13
+        139 |        368        1.54        2.67
+        158 |      1,609        6.74        9.41
+        177 |      5,896       24.70       34.12
+        196 |     15,724       65.88      100.00
+------------+-----------------------------------
+      Total |     23,866      100.00
+*/
+// drop games for which we have data on <= 120 of the variables
+// about 75% of these games are from 2005 or earlier
+drop if nmcount < 196  
+drop nmcount
+
+save ${dir}/cleaned_data/games_and_players.dta, replace
