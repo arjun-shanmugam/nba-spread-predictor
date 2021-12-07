@@ -1,5 +1,7 @@
+from model import run
+
 def train_and_test():
-    print("train and test")
+    run()
 
 
 if __name__ == '__main__':

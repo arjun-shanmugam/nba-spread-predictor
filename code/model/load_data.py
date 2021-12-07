@@ -15,5 +15,8 @@ def split_test_and_train(data):
     """
     splits dataframe into test and training datasets, where training is first 80% of the datasets
     """
-    train, test = data[len(data)//5 * 4], data[len(data)//5*4]
+    train = data[:len(data)//5 * 4]
+    test = data[len(data)//5 * 4 : len(data)]
+    # train = data[:2]
+    # test = data[2: 4]
     return train, test
