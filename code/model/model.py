@@ -1,18 +1,33 @@
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras import Model
-from preprocess import load_data_as_numpy, split_val_and_train
+from preprocess import load_data_as_numpy, split_test_and_train
 
 
-class Model(tf.keras.Model):
-    def __init__(self, vocab_size):
+class FFModelWithEmbeddings(tf.keras.Model):
+    def __init__(self, batch_size):
         super(Model, self).__init__()
+        self.E = tf.keras.layers.Embedding(batch_size, 32)
+        self.normalizer = tf.keras.layers.Normalization(axis=-1)
+        self.model = tf.keras.layers.Sequential([
+            tf.keras.layers.Dense(20,activation='relu'),
+            tf.keras.layers.Dense(20,activation='relu'),
+            tf.keras.layers.Dense(1,activation='linear')
+        ])
+
 
     def call(self, inputs):
-        return 0
+        team_ids = 0 #get team
+        year_ids = 0 #get year (will be complicated)
+        unique_ids = team_ids * 21 + year_ids
+        team_and_year_embeddings = tf.nn.embedding_lookup(unique_ids)
+        self.normalizer.adapt(inputs)
+        inputs = self.normalizer(inputs) #normalize non-embedding inputs
+        inputs = tf.keras.layers.concatenate([inputs, team_and_year_embeddings])
+        return self.model(inputs)
         
-    def loss(self, probs, labels):
-        return 0
+    def loss(self, y_pred, y_true):
+        return tf.keras.losses.mean_squared_error(y_true, y_pred)
 
 class FFModel(tf.keras.Model):
     def __init__(self):
@@ -21,13 +36,13 @@ class FFModel(tf.keras.Model):
         self.normalizer.adapt() #normalizing data batch by batch
         self.model = tf.keras.layers.Sequential([
             self.normalizer,
-            tf.keras.layers.Dense(20,activation='relu')
-            tf.keras.layers.Dense(20,activation='relu')
+            tf.keras.layers.Dense(20,activation='relu'),
+            tf.keras.layers.Dense(20,activation='relu'),
             tf.keras.layers.Dense(1,activation='linear')
         ])
 
         self.model.compile(
-            optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+            optimizer = tf.keras.optimizers.Adam(learning_rate=0.01),
             loss = tf.keras.layers.MeanSquaredError()
         )
 
