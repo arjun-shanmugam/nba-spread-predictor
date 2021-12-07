@@ -3,6 +3,7 @@ import numpy as np
 from tensorflow.keras import Model
 from load_data import load_data_as_numpy, split_test_and_train
 from datetime import datetime
+from matplotlib import pyplot as plt
 
 
 class FFModelWithEmbeddings(tf.keras.Model):
@@ -19,6 +20,7 @@ class FFModelWithEmbeddings(tf.keras.Model):
             tf.keras.layers.Dense(20,activation='relu'),
             tf.keras.layers.Dense(1,activation='linear')
         ])
+        self.loss_list = [] #loss_list for loss visualization
 
 
     def call(self, inputs):
@@ -77,7 +79,6 @@ def train(model, train_inputs, train_labels):
     index = 0
     total_loss = 0
     #batch inputs and labels
-
     while index * model.batch_size < len(train_inputs):
         with tf.GradientTape() as tape:
             preds = model.call(train_inputs[index*model.batch_size:min(index*model.batch_size+model.batch_size, len(train_inputs))])
@@ -87,7 +88,9 @@ def train(model, train_inputs, train_labels):
             total_loss += loss
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-    return total_loss / len(train_inputs)
+    avg_loss = total_loss / len(train_inputs)
+    model.loss_list.append(avg_loss)
+    return avg_loss
 
 def test2(model,test_inputs,test_labels,batch_size):
     """
@@ -114,6 +117,19 @@ def test(model, test_inputs, test_labels):
         index += 1
     return total_loss / len(test_inputs)
 
+def visualize_epoch_loss(losses):
+    """
+    Creates a simple graph to show the model losses during training.
+    :param losses: list of loss data stored during training
+    
+    :returns: no return type, generates a plot
+    """
+    x = [i for i in range(len(losses))]
+    plt.plot(x, losses)
+    plt.title('Loss per Epoch')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.show()  
 
 def main():
     #get data
@@ -134,7 +150,7 @@ def main():
         print("EPOCH: {}".format(epoch))
         print(train(ff_model_with_embeddings, train_data, train_labels))
     print(test(ff_model_with_embeddings, test_data, test_labels))
-
+    visualize_epoch_loss(ff_model_with_embeddings.loss_list)
 
 if __name__ == '__main__':
     main()
