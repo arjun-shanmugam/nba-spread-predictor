@@ -53,9 +53,6 @@ def preprocess_features(batch_size=256, preprocess_for_embeddings=False):
         all_inputs.append(categorical_col)
         encoded_features.append(encoded_categorical_col)
 
-    if preprocess_for_embeddings:
-        train_ds_stats, train_vector_ids, test_ds_stats, test_vector_ids = preprocessing_for_embedding_nn(train_ds, test_ds)
-
     all_features = tf.keras.layers.concatenate(encoded_features)
     return all_features, all_inputs, train_ds, test_ds
 
@@ -109,17 +106,4 @@ def get_category_encoding_layer(name, dataset, dtype, max_tokens=None):
     # Apply one-hot encoding to the indices. The lambda function captures the
     # layer, so you can use them, or include them in the Keras Functional model later.
     return lambda feature: encoder(index(feature))
-
-"""
-* Generates a unique season/team id, and stores
-* Drops the date, year, and team id info from df
-* Returns (stat_vector,  team_id_vector) tuple
-"""
-def preprocessing_for_embedding_nn(train_ds, test_ds):
-    return None, None, None, None
-
-def create_unique_team_year_id(month, year, team_id):
-    if month == 1 or month == 2 or month == 3:
-        year = year - 1 #count the year as the year the season began in
-    
 
