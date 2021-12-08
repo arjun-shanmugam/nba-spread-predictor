@@ -16,10 +16,10 @@ def create_model():
     all_features, all_inputs, train_ds, test_ds = preprocess_features()
 
     # Add layers
-    x = tf.keras.layers.Dense(193 * 6, activation="relu")(all_features)
-    x = tf.keras.layers.Dense(193 * 5, activation="relu")(x)
+    x = tf.keras.layers.Dense(193 * 10, activation="relu")(all_features)
+    x = tf.keras.layers.Dense(193 * 8, activation="relu")(x)
+    x = tf.keras.layers.Dense(193 * 6, activation="relu")(x)
     x = tf.keras.layers.Dense(193 * 4, activation="relu")(x)
-    x = tf.keras.layers.Dense(193 * 3, activation="relu")(x)
     x = tf.keras.layers.Dense(193 * 2, activation="relu")(x)
     x = tf.keras.layers.Dense(193 * 1, activation="relu")(x)
     x = tf.keras.layers.Dense(int(193 * .5), activation="relu")(x)
@@ -37,7 +37,7 @@ def create_model():
 
 
 def train_and_testmodel(model, train_ds, test_ds, name_to_save='nba'):
-    model.fit(train_ds, epochs=10)
+    model.fit(train_ds, epochs=40)
     model.save(name_to_save)
 
     loss, accuracy = model.evaluate(test_ds)
@@ -46,21 +46,10 @@ def train_and_testmodel(model, train_ds, test_ds, name_to_save='nba'):
 
 def predict(model_name):
     model = tf.keras.models.load_model(model_name)
-    sample = {
-        'Type': 'Cat',
-        'Age': 3,
-        'Breed1': 'Tabby',
-        'Gender': 'Male',
-        'Color1': 'Black',
-        'Color2': 'White',
-        'MaturitySize': 'Small',
-        'FurLength': 'Short',
-        'Vaccinated': 'No',
-        'Sterilized': 'No',
-        'Health': 'Healthy',
-        'Fee': 100,
-        'PhotoAmt': 2,
-    }
+    data = pd.read_csv("/Users/arjunshanmugam/Desktop/Untitled.csv")
+    row1 = data.iloc[0]
+    print(row1.to_dict())
 
-    input_dict = {name: tf.convert_to_tensor([value]) for name, value in sample.items()}
+    input_dict = {name: tf.convert_to_tensor([value]) for name, value in row1.items()}
     predictions = model.predict(input_dict)
+    print(predictions)
