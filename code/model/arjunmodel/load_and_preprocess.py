@@ -15,19 +15,18 @@ Uses the helper methods below to actually preprocess the features
 def preprocess_features(batch_size=256):
     # convert train and test DataFrames to Datasets
     train, test = load_df()
-    train.drop(['labels'], axis=1)
-    test.drop(['labels'], axis=1)
     train_ds = df_to_dataset(train)
     test_ds = df_to_dataset(test)
+    train = train.drop(['labels'], axis=1)
+    test = test.drop(['labels'], axis=1)
 
     # create lists of numerical and categorical feature names
     colnames = train.columns.tolist()  # list of all columns
-    print(colnames)
     categorical_features = ['home_team_id', 'visitor_team_id']  # categoricals
     colnames.remove('home_team_id')
     colnames.remove('visitor_team_id')
     numerical_features = colnames  # after removing the only two categorical features, what remains are numerical features
-
+    print(numerical_features)
     all_inputs = []
     encoded_features = []
 
@@ -70,11 +69,13 @@ def load_df():
 """
 Converts a dataframe to a tensorflow Dataset.
 """
-def df_to_dataset(dataframe, batch_size=32):
+def df_to_dataset(dataframe, shuffle=True, batch_size=32):
     df = dataframe.copy()
     labels = df.pop('labels')
     df = {key: value[:, tf.newaxis] for key, value in dataframe.items()}
     ds = tf.data.Dataset.from_tensor_slices((dict(df), labels))
+    if shuffle:
+        ds = ds.shuffle(buffer_size=len(dataframe))
     ds = ds.batch(batch_size)
     ds = ds.prefetch(batch_size)
     return ds

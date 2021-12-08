@@ -1,5 +1,5 @@
 import tensorflow as tf
-from arjunmodel.load_and_preprocess import preprocess_features
+from load_and_preprocess import preprocess_features
 
 model = tf.keras.models.load_model("nba")
 
