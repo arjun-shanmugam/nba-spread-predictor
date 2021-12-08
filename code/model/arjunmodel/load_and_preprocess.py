@@ -15,11 +15,14 @@ Uses the helper methods below to actually preprocess the features
 def preprocess_features(batch_size=256):
     # convert train and test DataFrames to Datasets
     train, test = load_df()
+    train.drop(['labels'], axis=1)
+    test.drop(['labels'], axis=1)
     train_ds = df_to_dataset(train)
     test_ds = df_to_dataset(test)
 
     # create lists of numerical and categorical feature names
     colnames = train.columns.tolist()  # list of all columns
+    print(colnames)
     categorical_features = ['home_team_id', 'visitor_team_id']  # categoricals
     colnames.remove('home_team_id')
     colnames.remove('visitor_team_id')
