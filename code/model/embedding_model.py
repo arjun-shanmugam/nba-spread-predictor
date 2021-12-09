@@ -13,11 +13,11 @@ from scratch_file import id_to_teamname_and_record
 class FFModelWithEmbeddings(tf.keras.Model):
     def __init__(self, batch_size, team_id_max):
         super().__init__()
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=.1)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=.01)
         self.logdir="logs/FFModelWithEmbeddings/" + datetime.now().strftime("%Y%m%d-%H%M%S")
         self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=self.logdir)
         self.batch_size = batch_size
-        self.E = tf.keras.layers.Embedding(team_id_max, 32, input_length=2)
+        self.E = tf.keras.layers.Embedding(team_id_max, 8, input_length=2)
         self.normalizer = tf.keras.layers.Normalization(axis=-1)
         self.flattern_layer = tf.keras.layers.Flatten()
         self.model = tf.keras.Sequential([
@@ -95,6 +95,7 @@ def test(model, test_ds, test_ids, batch_size=32):
             if len(np.hstack(x_batch.values())) == batch_size: #hacky fix to prevent error
                 preds = model.call(np.hstack(x_batch.values()), train_ids[idx * batch_size:min(idx * batch_size + batch_size, len(train_ids))])
                 loss = model.loss(preds, y_batch)
+                error = sum(abs(preds - y_batch))
                 total_loss += loss
             idx += 1
     avg_loss = total_loss / (idx * batch_size)
@@ -129,7 +130,7 @@ def plot_embedding(team_ids, labels, model):
     print(len(x))
     print(len(y))
     print(len([id_to_teamname_and_record[label][1] for label in range(1610612737, 1610612767)]))
-    plt.plot([id_to_teamname_and_record[label][1] for label in range(1610612737, 1610612767)], one_d_projections)
+    plt.scatter([id_to_teamname_and_record[label][1] for label in range(1610612737, 1610612767)], one_d_projections)
     plt.show()
     plt.scatter(x, y, c=[id_to_teamname_and_record[label][1] for label in range(1610612737, 1610612767)], cmap=cmap, norm=norm)
     # for idx, point in enumerate(zip(x, y)):
@@ -140,12 +141,12 @@ if __name__ == "__main__":
     train_ds, test_ds, train_ids, test_ids, team_map = preprocess()
     train_ids, test_ids = np.ndarray.astype(train_ids, int), np.ndarray.astype(test_ids, int)
     model = FFModelWithEmbeddings(32, max(np.max(train_ids), np.max(test_ids)) + 1) #make sure there are enough embeddings
-    for epoch in range(50):
+    for epoch in range(15):
         print(epoch)
         print(train(model, train_ds, train_ids))
-    # avg_loss = test(model, test_ds, test_ids)
-    # print("TEST AVG LOSS")
-    # print(avg_loss)
+    avg_loss = test(model, test_ds, test_ids)
+    print("TEST AVG LOSS")
+    print(avg_loss)
     embedding_ids = []
     for team_id in range(1610612737, 1610612767):
         embedding_ids.append(team_map[(2018, team_id)])
