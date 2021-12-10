@@ -72,6 +72,7 @@ Converts a dataframe to a tensorflow Dataset.
 def df_to_dataset(dataframe, shuffle=True, batch_size=32):
     df = dataframe.copy()
     labels = df.pop('labels')
+    print("I AM IN ARJUN'S CODE")
     df = {key: value[:, tf.newaxis] for key, value in dataframe.items()}
     ds = tf.data.Dataset.from_tensor_slices((dict(df), labels))
     if shuffle:
