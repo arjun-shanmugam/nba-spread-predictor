@@ -105,19 +105,16 @@ def test(model, test_features, test_labels, test_ids, batch_size=32, return_pred
     all_preds = []
     all_labels = []
     while (idx + 1) * batch_size < len(test_labels):
-        with tf.GradientTape() as tape:
-            preds = model.call(test_features[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))],
+        preds = model.call(test_features[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))],
                                test_ids[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))])[:,0]
-            all_preds.extend(list(preds))
-            all_labels.extend(list(test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))]))
-            loss = model.loss(preds, test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))])
-            seen_examples += len(preds)
-            print("PREDS!!!")
-            print(preds.shape)
-            total_l1_error += tf.losses.mean_absolute_error(preds, test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))])
-            total_l2_error += tf.losses.mean_squared_error(preds, test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))])
-            total_loss += loss
-            idx += 1
+        all_preds.extend(list(preds))
+        all_labels.extend(list(test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))]))
+        loss = model.loss(preds, test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))])
+        seen_examples += len(preds)
+        total_l1_error += tf.losses.mean_absolute_error(preds, test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))])
+        total_l2_error += tf.losses.mean_squared_error(preds, test_labels[idx * batch_size:min(idx * batch_size + batch_size, len(test_ids))])
+        total_loss += loss
+        idx += 1
     avg_loss = total_loss / (idx)
     avg_err = total_l1_error / (idx)
     avg_l2_err = total_l2_error / (idx)
@@ -200,9 +197,10 @@ if __name__ == "__main__":
     train_features, train_labels, test_features, test_labels, train_ids, test_ids, team_map = preprocess()
     train_ids, test_ids = np.ndarray.astype(train_ids, int), np.ndarray.astype(test_ids, int)
     model = FFModelWithEmbeddings(32, max(np.max(train_ids), np.max(test_ids)) + 1) #make sure there are enough embeddings
-    for epoch in range(10):
+    for epoch in range(20):
         print(epoch)
         print(train(model, train_features, train_labels, train_ids))
+        print(test(model, test_features, test_labels, test_ids))
     avg_loss, avg_error, avg_l2_error = test(model, test_features, test_labels, test_ids)
     print(avg_loss)
     print(avg_error)
